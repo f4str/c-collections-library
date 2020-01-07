@@ -1,6 +1,4 @@
-#ifndef LINKEDLIST_H
-#define LINKEDLIST_H
-
+#pragma once
 #include <stdbool.h>
 
 struct linkedlist_node {
@@ -42,5 +40,3 @@ bool linkedlist_contains(const linkedlist* list, void* e);
 int linkedlist_index(const linkedlist* list, void* e);
 int linkedlist_erase(linkedlist* list, void* e);
 void linkedlist_clear(linkedlist* list);
-
-#endif

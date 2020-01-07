@@ -1,6 +1,4 @@
-#ifndef ARRAYLIST_H
-#define ARRAYLIST_H
-
+#pragma once
 #include <stdbool.h>
 
 static const int INITIAL_CAPACITY = 16;
@@ -28,5 +26,3 @@ void vector_insert(vector* v, int index, void* e);
 void* vector_remove(vector* v, int index);
 bool vector_erase(vector* v, void* e);
 void vector_clear(vector* v);
-
-#endif

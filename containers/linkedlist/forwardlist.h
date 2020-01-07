@@ -1,6 +1,4 @@
-#ifndef FORWARDLIST_H
-#define FORWARDLIST_H
-
+#pragma once
 #include <stdbool.h>
 
 struct forwardlist_node {
@@ -41,5 +39,3 @@ bool forwardlist_contains(const forwardlist* list, void* e);
 int forwardlist_index(const forwardlist* list, void* e);
 int forwardlist_erase(forwardlist* list, void* e);
 void forwardlist_clear(forwardlist* list);
-
-#endif
