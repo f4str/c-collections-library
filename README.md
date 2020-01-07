@@ -1,1 +1,1 @@
-# C Containers Library
+# C Collections Library
