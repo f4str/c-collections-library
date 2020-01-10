@@ -1,28 +1,58 @@
-#include <math.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include "search.h"
 
-int linear_search(void** array, int length, void* x) {
-	int i;
-	for (i = 0; i < length; ++i) {
-		if (array[i] == x) {
+static int comparator(const void* x, const void* y) {
+	return (int)x - (int)y;
+}
+
+static void* element(void* addr, size_t size) {
+	char* a = (char*)addr + size;
+	void* buffer = 0;
+	char* elem = (char*)&buffer + size;
+	size_t i;
+	
+	for (i = size - 1; i >= 0; --i, --a, --elem) {
+		*elem = *a;
+	}
+	return buffer;
+}
+
+int linear_search(void* base, size_t length, size_t size, void* x, int (*compar)(const void*, const void*)) {
+	char* elem = (char*)base;
+	size_t i;
+	
+	if (compar == NULL) {
+		compar = &comparator;
+	}
+	
+	for (i = 0; i < length; ++i, elem += size) {
+		if (compar(element(elem, size), x) == 0) {
 			return i;
 		}
 	}
 	return -1;
 }
 
-int binary_search(void** array, int length, void* x) {
+int binary_search(void* base, size_t length, size_t size, void* x, int (*compar)(const void*, const void*)) {
 	int low = 0;
 	int high = length - 1;
 	int mid;
+	char* addr = (char*)base;
+	void* elem;
+	
+	if (compar == NULL) {
+		compar = &comparator;
+	}
 	
 	while (low <= high) {
 		mid = (high - 1) / 2 + 1;
-		if (array[mid] < x) {
+		elem = element(addr + size * mid, size);
+		if (compar(elem, x) < 0) {
 			low = mid + 1;
 		}
-		else if (array[mid] > x) {
+		else if (compar(elem, x) > 0) {
 			high = mid - 1;
 		}
 		else {
@@ -32,81 +62,121 @@ int binary_search(void** array, int length, void* x) {
 	return -1;
 }
 
-int jump_search(void** array, int length, void* x) {
+int jump_search(void* base, size_t length, size_t size, void* x, int (*compar)(const void*, const void*)) {
 	int step = sqrt(length);
 	int prev = 0;
+	char* addr = (char*)base;
+	void* elem;
 	
-	while (array[step - 1] < x) {
+	if (compar == NULL) {
+		compar = &comparator;
+	}
+	
+	elem = element(addr + size * (step - 1), size);
+	while (compar(elem, x) < 0) {
 		prev = step;
 		step += sqrt(length);
-		step = step < length ? step : length - 1;
 		if (prev >= length)	{
 			return -1;
 		}
+		elem = element(addr + size * (step - 1), size);
 	}
-	while (array[prev] < x) {
+	
+	elem = element(addr + size * prev, size);
+	while (compar(elem, x) < 0) {
 		++prev;
 		if (prev == step) {
 			return -1;
 		}
+		elem = element(addr + size * prev, size);
 	}
-	if (array[prev] == x) {
+	
+	elem = element(addr + size * prev, size);
+	if (compar(elem, x) == 0) {
 		return prev;
 	}
 	return -1;
 }
 
-int exponential_search(void** array, int length, void* x) {
-	int i = 1;
+int exponential_search(void* base, size_t length, size_t size, void* x, int (*compar)(const void*, const void*)) {
+	size_t i = 1;
+	char* addr = (char*)base;
+	void* elem;
 	
-	if (*array == x) {
+	if (compar == NULL) {
+		compar = &comparator;
+	}
+	
+	elem = element(addr, size);
+	if (compar(elem, x) == 0) {
 		return 0;
 	}
-	while (i < length && array[i] <= x) {
+	
+	elem = element(addr + size * i, size);
+	while (i < length && compar(elem, x) <= 0) {
 		i *= 2;
+		elem = element(addr + size * i, size);
 	}
+	
 	i = i < length ? i : length - 1;
-	return binary_search(array + i / 2, i, x);
+	return binary_search(addr + size * (i / 2), i, size, x, compar);
 }
 
-int interpolation_search(void** array, int length, void* x) {
+int interpolation_search(void* base, size_t length, size_t size, void* x, int (*compar)(const void*, const void*)) {
 	int low = 0;
 	int high = length - 1;
-	int position;
+	int mid;
+	char* addr = (char*)base;
+	void* elem_low;
+	void* elem_high;
+	void* elem_mid;
 	
-	while (low <= high && x >= array[low] && x <= array[high]) {
-		if (low == high && array[low] == x) {
-			return low;
+	if (compar == NULL) {
+		compar = &comparator;
+	}
+	
+	elem_low = element(addr + size * low, size);
+	elem_high = element(addr + size * high, size);
+	while (compar(elem_low, elem_high) != 0 && compar(elem_low, x) <= 0 && compar(elem_high, x) <= 0) {
+		mid = low + ((x - elem_low) * (high - low) / (elem_high - elem_low));
+		elem_mid = element(addr + size * mid, size);
+		if (compar(elem_mid, x) < 0) {
+			low = mid + 1;
+		}
+		else if (compar(elem_mid, x) > 0) {
+			high = mid - 1;
 		}
 		else {
-			return -1;
+			return mid;
 		}
-		
-		position = low + (((double)(high - low) / (array[high] - array[low])) * (x - array[low]));
-		if (array[position] < x) {
-			low = position + 1;
-		}
-		else if (array[position] > x) {
-			high = position - 1;
-		}
-		else {
-			return position;
-		}
+		elem_low = element(addr + size * low, size);
+		elem_high = element(addr + size * high, size);
+	}
+	
+	if (compar(elem_low, x) == 0) {
+		return low;
 	}
 	return -1;
 }
 
-int randomized_search(void** array, int length, void* x) {
-	int i, j;
+int randomized_search(void* base, size_t length, size_t size, void* x, int (*compar)(const void*, const void*)) {
+	char* elem = (char*)base;
+	char* addr = (char*)base;
+	char* rand_elem;
+	size_t i, j;
 	srand(time(0));
 	
-	for (i = 0; i < length; ++i) {
-		if (array[i] == x) {
+	if (compar == NULL) {
+		compar = &comparator;
+	}
+	
+	for (i = 0; i < length; ++i, elem += size) {
+		if (compar(element(elem, size), x) == 0) {
 			return i;
 		}
-		
 		j = rand() % (length - i) + i;
-		if (array[j] == x) {
+		rand_elem = element(addr + size * j, size);
+		if (compar(rand_elem, x) == 0) {
 			return j;
 		}
 	}
