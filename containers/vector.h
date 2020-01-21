@@ -11,7 +11,7 @@ struct vector {
 
 typedef struct vector vector;
 
-struct vector* vector_new(void);
+vector* vector_new(void);
 void vector_init(vector* v);
 void vector_free(vector* v);
 int vector_size(const vector* v);

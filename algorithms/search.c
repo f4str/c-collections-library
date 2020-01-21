@@ -24,7 +24,7 @@ int linear_search(void* base, size_t length, size_t size, void* x, int (*compar)
 	size_t i;
 	
 	if (compar == NULL) {
-		compar = &comparator;
+		compar = comparator;
 	}
 	
 	for (i = 0; i < length; ++i, elem += size) {
@@ -43,7 +43,7 @@ int binary_search(void* base, size_t length, size_t size, void* x, int (*compar)
 	void* elem;
 	
 	if (compar == NULL) {
-		compar = &comparator;
+		compar = comparator;
 	}
 	
 	while (low <= high) {
@@ -69,7 +69,7 @@ int jump_search(void* base, size_t length, size_t size, void* x, int (*compar)(c
 	void* elem;
 	
 	if (compar == NULL) {
-		compar = &comparator;
+		compar = comparator;
 	}
 	
 	elem = element(addr + size * (step - 1), size);
@@ -104,7 +104,7 @@ int exponential_search(void* base, size_t length, size_t size, void* x, int (*co
 	void* elem;
 	
 	if (compar == NULL) {
-		compar = &comparator;
+		compar = comparator;
 	}
 	
 	elem = element(addr, size);
@@ -132,7 +132,7 @@ int interpolation_search(void* base, size_t length, size_t size, void* x, int (*
 	void* elem_mid;
 	
 	if (compar == NULL) {
-		compar = &comparator;
+		compar = comparator;
 	}
 	
 	elem_low = element(addr + size * low, size);
@@ -167,7 +167,7 @@ int randomized_search(void* base, size_t length, size_t size, void* x, int (*com
 	srand(time(0));
 	
 	if (compar == NULL) {
-		compar = &comparator;
+		compar = comparator;
 	}
 	
 	for (i = 0; i < length; ++i, elem += size) {
