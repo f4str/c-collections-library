@@ -31,6 +31,10 @@ int priorityqueue_size(const priorityqueue* p) {
 	return p->size;
 }
 
+int priorityqueue_capacity(const priorityqueue* p) {
+	return p->capacity;
+}
+
 bool priorityqueue_empty(const priorityqueue* p) {
 	return p->size == 0;
 }
@@ -133,6 +137,16 @@ void priorityqueue_increase_key(priorityqueue* p, int index, void* e) {
 	p->data[index] = e;
 	priorityqueue_heapify(p, index);
 	return value;
+}
+
+void priorityqueue_change_key(priorityqueue* p, int index, void* e) {
+	void* value = p->data[index];
+	if (p->comparator(value, e) > 0) {
+		priorityqueue_decrease_key(p, index, e);
+	}
+	else {
+		priorityqueue_increase_key(p, index, e);
+	}
 }
 
 void priorityqueue_clear(priorityqueue* p) {
