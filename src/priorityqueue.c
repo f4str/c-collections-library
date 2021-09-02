@@ -1,9 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include "priorityqueue.h"
 
 static int comparator(const void* x, const void* y) {
-	return (int)x - (int)y;
+	return (uintptr_t)x - (uintptr_t)y;
 }
 
 priorityqueue* priorityqueue_new(int (*compar)(const void*, const void*)) {
@@ -75,7 +76,8 @@ void priorityqueue_insert(priorityqueue* p, void* e) {
 		p->capacity *= 2;
 	}
 	
-	int i = p->data[p->size];
+	p->data[p->size] = e;
+	int i = p->size;
 	int parent = (i - 1) / 2;
 	void* temp;
 	
@@ -117,7 +119,7 @@ void* priorityqueue_extract_min(priorityqueue* p) {
 	return root;
 }
 
-void priorityqueue_decrease_key(priorityqueue* p, int index, void* e) {
+void* priorityqueue_decrease_key(priorityqueue* p, int index, void* e) {
 	void* value = p->data[index];
 	void* temp;
 	int parent = (index - 1) / 2;
@@ -130,22 +132,23 @@ void priorityqueue_decrease_key(priorityqueue* p, int index, void* e) {
 		index = parent;
 		parent = (index - 1) / 2;
 	}
+	return value;
 }
 
-void priorityqueue_increase_key(priorityqueue* p, int index, void* e) {
+void* priorityqueue_increase_key(priorityqueue* p, int index, void* e) {
 	void* value = p->data[index];
 	p->data[index] = e;
 	priorityqueue_heapify(p, index);
 	return value;
 }
 
-void priorityqueue_change_key(priorityqueue* p, int index, void* e) {
+void* priorityqueue_change_key(priorityqueue* p, int index, void* e) {
 	void* value = p->data[index];
 	if (p->comparator(value, e) > 0) {
-		priorityqueue_decrease_key(p, index, e);
+		return priorityqueue_decrease_key(p, index, e);
 	}
 	else {
-		priorityqueue_increase_key(p, index, e);
+		return priorityqueue_increase_key(p, index, e);
 	}
 }
 
