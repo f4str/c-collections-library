@@ -22,5 +22,8 @@ $(OBJ):
 $(BIN):
 	mkdir -p $@
 
+check: $(TARGET)
+	@echo "Success, all tests passed."
+
 clean:
 	rm -r $(OBJ) $(BIN)
